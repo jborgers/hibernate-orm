@@ -6,6 +6,8 @@
  */
 package org.hibernate.test.queryplan;
 
+import org.hibernate.test.type.BasicTypeRegistryTest;
+import org.hibernate.type.CustomType;
 import org.junit.Test;
 
 import org.hibernate.engine.query.spi.NativeSQLQueryPlan;
@@ -48,5 +50,33 @@ public class NativeSQLQueryPlanEqualsTest extends BaseCoreFunctionalTestCase {
 				new NativeSQLQueryScalarReturn( blah, sessionFactory().getTypeResolver().basic( "int" ) )
 		};
 		return new NativeSQLQuerySpecification( select, queryReturns, null );
+	}
+
+	@Test
+	public void testNativeSQLQuerySpecEqualsFailsWithCustomTypeAndNoHashCodeEquals() {
+		QueryPlanCache cache = new QueryPlanCache(sessionFactory());
+		NativeSQLQuerySpecification firstSpec = createCustomTypeSpec();
+		NativeSQLQuerySpecification secondSpec = createCustomTypeSpec();
+
+		NativeSQLQueryPlan firstPlan = cache.getNativeSQLQueryPlan(firstSpec);
+		NativeSQLQueryPlan secondPlan = cache.getNativeSQLQueryPlan(secondSpec);
+
+		//Test will fail if either CustomType or specific UserType hashcode/equals are not implemented.
+		//QueryPlanCache will contain 2 entries and keep growing in size;
+		assertEquals(firstPlan, secondPlan);
+	}
+
+	private NativeSQLQuerySpecification createCustomTypeSpec() {
+		String blah = "blah";
+		String select = "select blah from blah";
+
+		// UserType doesn't implement equals/hashCode: will fail
+		// NativeSQLQueryReturn[] queryReturns = new NativeSQLQueryScalarReturn[]{
+		//		new NativeSQLQueryScalarReturn(blah, new CustomType(new BasicTypeRegistryTest.TotallyIrrelevantUserType()))
+		//};
+		NativeSQLQueryReturn[] queryReturns = new NativeSQLQueryScalarReturn[]{
+				new NativeSQLQueryScalarReturn(blah, new CustomType(new BasicTypeRegistryTest.UserTypeImplementingEqualsHashCode()))
+		};
+		return new NativeSQLQuerySpecification(select, queryReturns, null);
 	}
 }

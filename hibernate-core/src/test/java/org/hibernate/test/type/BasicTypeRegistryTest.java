@@ -172,6 +172,25 @@ public class BasicTypeRegistryTest extends BaseUnitTestCase {
 		}
 	}
 
+	public static class UserTypeImplementingEqualsHashCode extends TotallyIrrelevantUserType implements UserType {
+		@Override
+		public int hashCode() {
+			return getClass().hashCode(); // no state, so all instances of this class are equal and have same hashCode
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
+			// no state, so all instances of this class are equal
+			return true;
+		}
+	}
+
 	public static class TotallyIrrelevantCompositeUserType implements CompositeUserType {
 		@Override
 		public String[] getPropertyNames() {

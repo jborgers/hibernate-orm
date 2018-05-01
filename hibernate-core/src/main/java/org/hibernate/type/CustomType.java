@@ -318,6 +318,7 @@ public class CustomType
 		if ( canDoExtraction() ) {
 			return ((ProcedureParameterExtractionAware) userType).extract( statement, startIndex, session );
 		}
+
 		else {
 			throw new UnsupportedOperationException(
 					"Type [" + userType + "] does support parameter value extraction"
@@ -337,4 +338,18 @@ public class CustomType
 			);
 		}
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		CustomType that = (CustomType) o;
+		return userType.equals(that.userType);
+	}
+
+	@Override
+	public int hashCode() {
+		return userType.hashCode();
+	}
+
 }
